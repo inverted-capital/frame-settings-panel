@@ -3,17 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { ArtifactFrame, ArtifactSyncer } from '@artifact/client/react'
 import { HOST_SCOPE } from '@artifact/client/api'
 import App from './App.tsx'
-import type { AccountData } from './types/account'
+import { defaultData as defaultSettings } from './hooks/useSettings.ts'
 import './index.css'
-
-const mockProfile: AccountData = {
-  name: 'Jane Doe'
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ArtifactFrame
-      mockRepos={{ mock: { main: { 'profile.json': mockProfile } } }}
+      mockRepos={{ mock: { main: { 'settings.json': defaultSettings } } }}
       mockFrameProps={{
         target: { did: HOST_SCOPE.did, repo: 'mock', branch: 'main' }
       }}
