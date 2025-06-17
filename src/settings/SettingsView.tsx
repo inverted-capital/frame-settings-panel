@@ -57,7 +57,7 @@ const SettingsView: React.FC = () => {
   if (loading) return <p>Loading...</p>
 
   return (
-    <div className="animate-fadeIn">
+    <div className="p-6 animate-fadeIn">
       <h1 className="text-2xl font-bold mb-6 flex items-center">
         <Settings className="mr-2" size={24} />
         Repository Settings
