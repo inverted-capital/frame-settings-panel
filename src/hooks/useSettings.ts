@@ -83,7 +83,7 @@ export default function useSettings() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (exists === null) return
+    if (!artifact || exists === null) return
     if (exists === false) {
       artifact.files.write.json('settings.json', defaultData)
       artifact.branch.write.commit('Initialize settings')
@@ -102,6 +102,7 @@ export default function useSettings() {
   const save = useCallback(
     (next: SettingsData) => {
       setData(next)
+      if (!artifact) return
       artifact.files.write.json('settings.json', next)
       artifact.branch.write.commit('Update settings')
     },
