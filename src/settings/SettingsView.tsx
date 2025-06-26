@@ -72,7 +72,7 @@ const SettingsView: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200">
         <div className="flex border-b border-gray-200">
           <button
             className={`px-4 py-3 text-sm font-medium ${
