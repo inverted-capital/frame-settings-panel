@@ -11,23 +11,16 @@ import {
   Link
 } from 'lucide-react'
 import useSettings from '../hooks/useSettings.ts'
-import { useScope } from '@artifact/client/hooks'
+import { useArtifact, useRemotes, useScope } from '@artifact/client/hooks'
 import type { BranchScope } from '@artifact/client/api'
 
 const SettingsView: React.FC = () => {
-  const {
-    remotes,
-    permissions,
-    roles,
-    napps,
-    addRemote,
-    removeRemote,
-    addNapp,
-    toggleNappStatus,
-    loading
-  } = useSettings()
+  const { permissions, roles, napps, addNapp, toggleNappStatus, loading } =
+    useSettings()
 
   const scope = useScope() as BranchScope
+  const artifact = useArtifact()
+  const remotes = useRemotes() || []
 
   const [activeTab, setActiveTab] = useState('remotes')
   const [newRemoteName, setNewRemoteName] = useState('')
@@ -37,13 +30,27 @@ const SettingsView: React.FC = () => {
   const [newNappName, setNewNappName] = useState('')
   const [showAddNapp, setShowAddNapp] = useState(false)
 
-  const handleAddRemote = () => {
+  const handleAddRemote = async () => {
+    if (!artifact) return
     if (!newRemoteName.trim() || !newRemoteUrl.trim()) return
 
-    addRemote(newRemoteName, newRemoteUrl)
+    await artifact.repo.remotes.upsert({
+      name: newRemoteName,
+      url: newRemoteUrl
+    })
     setNewRemoteName('')
     setNewRemoteUrl('')
     setShowAddRemote(false)
+  }
+
+  const handleFetchRemote = async (name: string) => {
+    if (!artifact) return
+    await artifact.repo.remotes.fetch(name)
+  }
+
+  const handleRemoveRemote = async (name: string) => {
+    if (!artifact) return
+    await artifact.repo.remotes.rm(name)
   }
 
   const handleAddNapp = () => {
@@ -187,7 +194,7 @@ const SettingsView: React.FC = () => {
                 {remotes.length > 0 ? (
                   remotes.map((remote) => (
                     <div
-                      key={remote.id}
+                      key={remote.name}
                       className="p-3 border border-gray-200 rounded-md flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
                       <div className="flex items-center">
@@ -195,32 +202,24 @@ const SettingsView: React.FC = () => {
                           <Link size={18} className="text-blue-600" />
                         </div>
                         <div>
-                          <div className="font-medium flex items-center">
-                            {remote.name}
-                            {remote.isDefault && (
-                              <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                                Default
-                              </span>
-                            )}
-                          </div>
+                          <div className="font-medium">{remote.name}</div>
                           <div className="text-xs text-gray-500">
                             {remote.url}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center">
-                        <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded mr-2">
-                          {remote.type === 'both'
-                            ? 'Fetch & Push'
-                            : remote.type === 'fetch'
-                              ? 'Fetch Only'
-                              : 'Push Only'}
-                        </span>
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => removeRemote(remote.id)}
+                          onClick={() => handleFetchRemote(remote.name)}
+                          className="text-gray-500 hover:text-gray-700 p-1"
+                          title="Fetch remote"
+                        >
+                          Fetch
+                        </button>
+                        <button
+                          onClick={() => handleRemoveRemote(remote.name)}
                           className="text-red-500 hover:text-red-700 p-1"
-                          title="Remove remote"
-                          disabled={remote.isDefault}
+                          title="Delete remote"
                         >
                           <Trash2 size={16} />
                         </button>
